@@ -5,6 +5,7 @@ package org.example;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.openxmlformats.schemas.officeDocument.x2006.math.CTOMath;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,8 +33,21 @@ public class Main {
 
             List<XWPFParagraph> list = doc.getParagraphs();
             for (XWPFParagraph paragraph : list) {
-                System.out.print("Paragraph: ");
-                System.out.println(paragraph.getText());
+                System.out.println("Text: " + paragraph.getText());
+
+                // works as expected
+//                System.out.println("Underlying XML:");
+//                System.out.println(paragraph.getCTP().xmlText());
+
+                // parsing of word equations:
+                // gpt and https://stackoverflow.com/questions/44748712/reading-equations-formula-from-word-docx-to-html-and-save-database-using-jav
+                https://developer.adobe.com/experience-manager/reference-materials/cloud-service/javadoc/org/openxmlformats/schemas/wordprocessingml/x2006/main/CTRow.html
+
+                for (CTOMath item: paragraph.getCTP().getOMathList()) {
+                    System.out.println("Equation: " + item.xmlText());
+                    // this gets the xml of the option, extract the option and convert to latex later
+                }
+
             }
 
         }
