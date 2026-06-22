@@ -1,35 +1,42 @@
 package org.example;
-// https://www.baeldung.com/java-microsoft-word-with-apache-poi
-// https://mkyong.com/java/java-read-and-write-microsoft-word-with-apache-poi/
 
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.officeDocument.x2006.math.CTOMath;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
 
+import javax.lang.model.util.Elements;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
-// import org.openxmlformats.schemas.officeDocument.x2006.math.CTR;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
-// above import is different and results in text runs not getting detected by instanceof CTR
+public class Parser {
+    // this should act like a facade and only expose the init and parse methods
+    // not a singleton? idk if concurrent users means we need multiple instances;
+    // for each user, we can discard the used parser and instantiate a new one i guess, prob no overhead
 
+    List<ContentElement> elements;
+    String file_path;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
+    public Parser(String path) {
+        file_path = path;
+        elements = null;
+    }
 
-    // Parsing helpers
+    public List<ContentElement> getElements() {
+        if (elements == null) {
+            parseDocument();
+        }
 
+        return elements;
+    }
 
-    public static void main(String[] args) throws IOException {
-
-        String filename = "dummy_mcq.docx";
-        System.out.printf("Parsing test. Sample MCQs with different formats (not exhaustive) included.");
+    public void parseDocument() {
 
         try (XWPFDocument document = new XWPFDocument(
-                Files.newInputStream(Paths.get(filename)))) {
+                Files.newInputStream(Paths.get(file_path)))) {
 
             for (IBodyElement element: document.getBodyElements()) {
                 // paragraphs: text, equations, etc
@@ -66,6 +73,8 @@ public class Main {
                         // math (inline)
                         if (xmlobj instanceof CTOMath) {
                             System.out.println("Equation: " + xmlobj.xmlText());
+                            EquationElement eq = new EquationElement(xmlobj.xmlText());
+                            elements.add(eq);
                         }
 
                         // run (might have to do this conversion to preserve ordering if i use xmlobj with eqs)
@@ -88,6 +97,7 @@ public class Main {
                             } else {
                                 // Print ordinary text if no image is in the run
                                 System.out.print(run.getText(0));
+
                             }
 
                         }
@@ -112,17 +122,25 @@ public class Main {
 
                 // tables
                 else if (element instanceof XWPFTable) {
-                    System.out.println("Table idk: " + ((XWPFTable) element).getText());
+                    // System.out.println("Table idk: " + ((XWPFTable) element).getText());
+
+
+                    TableElement table = new TableElement()
+
+                    elements.add();
                 }
 
                 else {
-                    System.out.println("Other type: " + element.getElementType());
+                    // System.out.println("Other type: " + element.getElementType());
+                    TextElement other = new TextElement("Other");
+                    elements.add(other);
                 }
             }
 
 
 
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
     }
 }
