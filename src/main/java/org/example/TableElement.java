@@ -6,9 +6,13 @@ import java.util.List;
 
 public class TableElement implements ContentElement<XWPFTable> {
 
-    private List<List<Float>> table;
-    // or just use XWPFTable?
+    // conceptually this should be an intermediate repr of a table
+    // maybe i rly should store xwpf and only convert to nested list if needed
+    // but does that violate any design principle??
+    // tbf i dont even know what the final format should be so lets just do xwpf for now
 
+    // private List<List<Float>> table;
+    private XWPFTable table;
     public TableElement(XWPFTable raw_table) {
         table = transformFromRaw(raw_table);
     }
@@ -23,8 +27,8 @@ public class TableElement implements ContentElement<XWPFTable> {
         table = transformFromRaw(raw_table);
     }
 
-    public List<List<Float>> transformFromRaw(XWPFTable raw_table) {
-        // sth
-        return null;
+    public XWPFTable transformFromRaw(XWPFTable raw_table) {
+        // add any necessary transformations here
+        return raw_table;
     }
 }

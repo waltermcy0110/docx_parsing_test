@@ -10,6 +10,7 @@ import javax.lang.model.util.Elements;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
@@ -17,16 +18,17 @@ public class Parser {
     // not a singleton? idk if concurrent users means we need multiple instances;
     // for each user, we can discard the used parser and instantiate a new one i guess, prob no overhead
 
-    List<ContentElement> elements;
+    private List<ContentElement> elements;
     String file_path;
 
     public Parser(String path) {
         file_path = path;
-        elements = null;
+        elements = new ArrayList<>();
     }
 
     public List<ContentElement> getElements() {
-        if (elements == null) {
+        // if element is empty, try parsing once and return regardless of result
+        if (elements.isEmpty()) {
             parseDocument();
         }
 
@@ -48,27 +50,16 @@ public class Parser {
                     // if (paragraph.runsIsEmpty()) continue;
                     // commented in case it skips images or sth
 
-                    // now iterate over each CTP object
+                    // now iterate over each CTP(paragraph) object using xmlcursor
+                    // to preserve inline equation order
                     XmlCursor cursor = paragraph.getCTP().newCursor();
-                    // System.out.println("Type before toFirstChild: " + cursor.getName());
-                    cursor.toFirstChild(); // goes down from paragraph to run? nope, to p prop for all occurrences
-                    // System.out.println("Type after: " + cursor.getName());
+                    cursor.toFirstChild();
+
                     do {
                         XmlObject xmlobj = cursor.getObject();
                         // System.out.println(xmlobj.xmlText());
 
                         XmlCursor.TokenType tokenType = cursor.currentTokenType();
-
-                        // System.out.println("Type: " + cursor.getName());
-                        // System.out.println("is run? " + (cursor.getObject() instanceof CTR));
-                        // runs showed up as non-runs, made me look into import statements
-
-                        // determine object type
-                        // Runs (text, images)
-//                        if (xmlobj instanceof CTR) {
-//                            handleCTR(xmlobj);
-//                        }
-
 
                         // math (inline)
                         if (xmlobj instanceof CTOMath) {
@@ -82,7 +73,6 @@ public class Parser {
                         else if (xmlobj instanceof CTR) {
                             XWPFRun run = new XWPFRun((CTR)xmlobj, paragraph);
 
-                            // also google ai code, looks fine and non-destructive(?)
                             // Look for embedded pictures in this specific run
                             if (!run.getEmbeddedPictures().isEmpty()) {
                                 for (XWPFPicture picture : run.getEmbeddedPictures()) {
@@ -93,11 +83,15 @@ public class Parser {
 
                                     System.out.println("Found image inline! Description: " + description);
                                     System.out.println("Image byte size: " + rawData.length);
+
+                                    ImageElement img = new ImageElement(rawData);
+                                    elements.add(img);
                                 }
                             } else {
                                 // Print ordinary text if no image is in the run
-                                System.out.print(run.getText(0));
-
+                                // System.out.print(run.getText(0));
+                                TextElement text = new TextElement(run.getText(0));
+                                elements.add(text);
                             }
 
                         }
@@ -125,9 +119,9 @@ public class Parser {
                     // System.out.println("Table idk: " + ((XWPFTable) element).getText());
 
 
-                    TableElement table = new TableElement()
+                    TableElement table = new TableElement((XWPFTable) element);
 
-                    elements.add();
+                    elements.add(table);
                 }
 
                 else {
