@@ -64,8 +64,12 @@ public class Parser {
                         // math (inline)
                         if (xmlobj instanceof CTOMath) {
                             System.out.println("Equation: " + xmlobj.xmlText());
-                            EquationElement eq = new EquationElement(xmlobj.xmlText());
+//                            EquationElement eq = new EquationElement(xmlobj.xmlText());
+                            EquationElement eq = new EquationElement((CTOMath) xmlobj);
+                            System.out.println("MathML: " + eq.getPrintable());
+                            // obsolete: System.out.println("LaTeX: " + eq.getPrintable(true));
                             elements.add(eq);
+
                         }
 
                         // run (might have to do this conversion to preserve ordering if i use xmlobj with eqs)
@@ -84,7 +88,7 @@ public class Parser {
                                     System.out.println("Found image inline! Description: " + description);
                                     System.out.println("Image byte size: " + rawData.length);
 
-                                    ImageElement img = new ImageElement(rawData);
+                                    ImageElement img = new ImageElement(picture);
                                     elements.add(img);
                                 }
                             } else {

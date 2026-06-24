@@ -133,6 +133,7 @@ public class Main {
 
         for (ContentElement element: parsed_elements) {
             // print element
+            System.out.println(element.getPrintable());
         }
 
     }

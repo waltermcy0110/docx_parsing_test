@@ -6,4 +6,5 @@ public interface ContentElement<T> {
 
     public T getElement();
     public void setElement(T new_content);
+    public String getPrintable();
 }

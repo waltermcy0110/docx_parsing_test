@@ -18,4 +18,8 @@ public class TextElement implements ContentElement<String> {
         text = str.trim();
     }
 
+    @Override
+    public String getPrintable() {
+        return "Text: " + text;
+    }
 }

@@ -1,25 +1,37 @@
 package org.example;
 
-public class ImageElement implements ContentElement<byte[]> {
+import org.apache.poi.xwpf.usermodel.XWPFPicture;
 
-    private byte[] imageData;
+public class ImageElement implements ContentElement<XWPFPicture> {
 
-    public ImageElement(byte[] raw_data) {
-        imageData = transformFromRaw(raw_data);
+    private XWPFPicture image;
+
+    public ImageElement(XWPFPicture img) {
+        image = transformFromRaw(img);
     }
 
     @Override
-    public byte[] getElement() {
-        return imageData;
+    public XWPFPicture getElement() {
+        return image;
     }
 
     @Override
-    public void setElement(byte[] raw_data) {
-        imageData = transformFromRaw(raw_data);
+    public void setElement(XWPFPicture img) {
+        image = transformFromRaw(img);
     }
 
-    public byte[] transformFromRaw(byte[] raw_data) {
-        // nothing for now ig, i dont even know if imageData = raw_data works at all
-        return raw_data;
+    @Override
+    public String getPrintable() {
+        // just print out info about the image, like the eg code in main
+        // Access metadata and binary source data
+        String description = image.getDescription();
+        byte[] rawData = image.getPictureData().getData();
+        description += "\nImage byte size: " + rawData.length;
+        return description;
+    }
+
+    public XWPFPicture transformFromRaw(XWPFPicture img) {
+        // nothing for now ig, i dont even know if image = raw_data works at all
+        return img;
     }
 }

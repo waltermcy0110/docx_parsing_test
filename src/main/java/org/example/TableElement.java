@@ -27,6 +27,14 @@ public class TableElement implements ContentElement<XWPFTable> {
         table = transformFromRaw(raw_table);
     }
 
+    @Override
+    public String getPrintable() {
+        int rowNum = table.getNumberOfRows();
+        int colNum = table.getRow(0).getTableCells().size();
+        String result = rowNum + "x" + colNum + " table: " + table.getText();
+        return result;
+    }
+
     public XWPFTable transformFromRaw(XWPFTable raw_table) {
         // add any necessary transformations here
         return raw_table;
